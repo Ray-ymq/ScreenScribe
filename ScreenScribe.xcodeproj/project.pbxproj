@@ -1,0 +1,571 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0E002BA70E16C6EF7D9D988E /* SessionStorageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D051687CEF66B1B405DA9029 /* SessionStorageService.swift */; };
+		357E87FD903AF21AA2FA6C7B /* TranscriptModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A631020F4EADE5791506235 /* TranscriptModels.swift */; };
+		3FE599D694ADB329736BA936 /* AudioCaptureService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77D71C2A1897B234E7B11217 /* AudioCaptureService.swift */; };
+		4D92801679B7963E97E22C56 /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = 0ED061080AB52AE3333695F8 /* WhisperKit */; };
+		51B9AACA7D030CA278416FB3 /* ScreenScribeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C85FB332372E56C7D75B3005 /* ScreenScribeApp.swift */; };
+		53656FE76E0D3E91955D3EC3 /* SessionStateMachineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F85A326FDE47655ECDD54D40 /* SessionStateMachineTests.swift */; };
+		574B369C08EF1EDECB84288E /* SourceSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 020A9AD73BE0CB3E010CA89B /* SourceSelection.swift */; };
+		5EB4E847478FC238AE4D25EC /* TranscriptExporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A30D8B8FCAB5C98A4D7E4A5 /* TranscriptExporterTests.swift */; };
+		77D2FFAEF5B49F482AE10F23 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C50D079297C466D24E9554B /* SettingsView.swift */; };
+		9187DEDF6D76AEC254A3F96D /* TranscriptExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632C4F833BAEC3C7F0A4AC79 /* TranscriptExporter.swift */; };
+		AE4A9B86A9E3FBDAFFD7ACD0 /* MenuBarContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA2412F477201DCF7CE9AADC /* MenuBarContentView.swift */; };
+		B0055521E04ED51947C3BDB5 /* SessionModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B890771B714723A8B36E7F27 /* SessionModels.swift */; };
+		BF3FB15C6268A40F049881D6 /* AppSessionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C49D1F9805DB3CB16B3A218A /* AppSessionState.swift */; };
+		CC2127D884A48CFDEFA74B64 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E86989660094073127305B14 /* AppModel.swift */; };
+		D7D2A74F1CE7FDAAAF4ACFBF /* MainWindowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D1846FC2B81B88DFF25E78 /* MainWindowView.swift */; };
+		FB7108BCB0E7B431216F5A43 /* TranscriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 530EDFF6842A934A9EAEC746 /* TranscriptionService.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		BEDD8041CC3253B5BC03627B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 066A923EA2D15BDB23DDB27D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0E87ACA7F93DE3066270835D;
+			remoteInfo = ScreenScribe;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		020A9AD73BE0CB3E010CA89B /* SourceSelection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceSelection.swift; sourceTree = "<group>"; };
+		1A631020F4EADE5791506235 /* TranscriptModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptModels.swift; sourceTree = "<group>"; };
+		25D1846FC2B81B88DFF25E78 /* MainWindowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainWindowView.swift; sourceTree = "<group>"; };
+		3A30D8B8FCAB5C98A4D7E4A5 /* TranscriptExporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptExporterTests.swift; sourceTree = "<group>"; };
+		3C50D079297C466D24E9554B /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		3E4D9EED3C0099DC913C62BA /* ScreenScribe.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ScreenScribe.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		530EDFF6842A934A9EAEC746 /* TranscriptionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionService.swift; sourceTree = "<group>"; };
+		632C4F833BAEC3C7F0A4AC79 /* TranscriptExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptExporter.swift; sourceTree = "<group>"; };
+		77D71C2A1897B234E7B11217 /* AudioCaptureService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioCaptureService.swift; sourceTree = "<group>"; };
+		8098D7070FEF572EFBCA1AD1 /* ScreenScribe.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ScreenScribe.entitlements; sourceTree = "<group>"; };
+		84C06E09EBC109D7DDA1F2E1 /* ScreenScribeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ScreenScribeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B890771B714723A8B36E7F27 /* SessionModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionModels.swift; sourceTree = "<group>"; };
+		C49D1F9805DB3CB16B3A218A /* AppSessionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSessionState.swift; sourceTree = "<group>"; };
+		C85FB332372E56C7D75B3005 /* ScreenScribeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenScribeApp.swift; sourceTree = "<group>"; };
+		D051687CEF66B1B405DA9029 /* SessionStorageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStorageService.swift; sourceTree = "<group>"; };
+		E86989660094073127305B14 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		F85A326FDE47655ECDD54D40 /* SessionStateMachineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStateMachineTests.swift; sourceTree = "<group>"; };
+		FA2412F477201DCF7CE9AADC /* MenuBarContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarContentView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		EA5BD48FA1AC13C725FC5871 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4D92801679B7963E97E22C56 /* WhisperKit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		12B8529975896522ECEFB020 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				3C50D079297C466D24E9554B /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		22B53308DC3BB6C9EA8AD1B2 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				C49D1F9805DB3CB16B3A218A /* AppSessionState.swift */,
+				020A9AD73BE0CB3E010CA89B /* SourceSelection.swift */,
+				1A631020F4EADE5791506235 /* TranscriptModels.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		29F5940BEDEBDB3E92D1B057 = {
+			isa = PBXGroup;
+			children = (
+				FBFDAFE1FA00E97C73D38F0C /* ScreenScribe */,
+				325F9D5E307515F763CED2AE /* Tests */,
+				D997E1B9091F8D0BD43CD2D1 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		325F9D5E307515F763CED2AE /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				D0C46679540A3ECA8029AF46 /* ScreenScribeCoreTests */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		462C150E7B1D76A1DE886EC3 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				25D1846FC2B81B88DFF25E78 /* MainWindowView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		4F58619814AC9F641A21679D /* Export */ = {
+			isa = PBXGroup;
+			children = (
+				632C4F833BAEC3C7F0A4AC79 /* TranscriptExporter.swift */,
+			);
+			path = Export;
+			sourceTree = "<group>";
+		};
+		52814276714F7935D03A74EE /* SessionStorage */ = {
+			isa = PBXGroup;
+			children = (
+				B890771B714723A8B36E7F27 /* SessionModels.swift */,
+				D051687CEF66B1B405DA9029 /* SessionStorageService.swift */,
+			);
+			path = SessionStorage;
+			sourceTree = "<group>";
+		};
+		80A84706251CE16353118B82 /* Transcription */ = {
+			isa = PBXGroup;
+			children = (
+				530EDFF6842A934A9EAEC746 /* TranscriptionService.swift */,
+			);
+			path = Transcription;
+			sourceTree = "<group>";
+		};
+		95602FAFD9C1150AF193B9DA /* AudioCapture */ = {
+			isa = PBXGroup;
+			children = (
+				77D71C2A1897B234E7B11217 /* AudioCaptureService.swift */,
+			);
+			path = AudioCapture;
+			sourceTree = "<group>";
+		};
+		991BEF49D9F4B6D8D1E7DDEB /* MenuBar */ = {
+			isa = PBXGroup;
+			children = (
+				FA2412F477201DCF7CE9AADC /* MenuBarContentView.swift */,
+			);
+			path = MenuBar;
+			sourceTree = "<group>";
+		};
+		D0C46679540A3ECA8029AF46 /* ScreenScribeCoreTests */ = {
+			isa = PBXGroup;
+			children = (
+				F85A326FDE47655ECDD54D40 /* SessionStateMachineTests.swift */,
+				3A30D8B8FCAB5C98A4D7E4A5 /* TranscriptExporterTests.swift */,
+			);
+			path = ScreenScribeCoreTests;
+			sourceTree = "<group>";
+		};
+		D997E1B9091F8D0BD43CD2D1 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3E4D9EED3C0099DC913C62BA /* ScreenScribe.app */,
+				84C06E09EBC109D7DDA1F2E1 /* ScreenScribeTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		E560F0028D1E6A7A9A7E44EF /* App */ = {
+			isa = PBXGroup;
+			children = (
+				E86989660094073127305B14 /* AppModel.swift */,
+				C85FB332372E56C7D75B3005 /* ScreenScribeApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		FBFDAFE1FA00E97C73D38F0C /* ScreenScribe */ = {
+			isa = PBXGroup;
+			children = (
+				8098D7070FEF572EFBCA1AD1 /* ScreenScribe.entitlements */,
+				E560F0028D1E6A7A9A7E44EF /* App */,
+				95602FAFD9C1150AF193B9DA /* AudioCapture */,
+				22B53308DC3BB6C9EA8AD1B2 /* Core */,
+				4F58619814AC9F641A21679D /* Export */,
+				991BEF49D9F4B6D8D1E7DDEB /* MenuBar */,
+				52814276714F7935D03A74EE /* SessionStorage */,
+				12B8529975896522ECEFB020 /* Settings */,
+				80A84706251CE16353118B82 /* Transcription */,
+				462C150E7B1D76A1DE886EC3 /* Views */,
+			);
+			path = ScreenScribe;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		0E87ACA7F93DE3066270835D /* ScreenScribe */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D5F0F16434B37145E8A44DF9 /* Build configuration list for PBXNativeTarget "ScreenScribe" */;
+			buildPhases = (
+				13F9F3CA07DD7698FB312F22 /* Sources */,
+				EA5BD48FA1AC13C725FC5871 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ScreenScribe;
+			packageProductDependencies = (
+				0ED061080AB52AE3333695F8 /* WhisperKit */,
+			);
+			productName = ScreenScribe;
+			productReference = 3E4D9EED3C0099DC913C62BA /* ScreenScribe.app */;
+			productType = "com.apple.product-type.application";
+		};
+		320F05DBF4770EEAE21DA581 /* ScreenScribeTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BA09A2FC0C101DD5A5B03B27 /* Build configuration list for PBXNativeTarget "ScreenScribeTests" */;
+			buildPhases = (
+				8F0C39AE16302F3F128822CB /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				033791B50C2E3D43CC9BF8DD /* PBXTargetDependency */,
+			);
+			name = ScreenScribeTests;
+			packageProductDependencies = (
+			);
+			productName = ScreenScribeTests;
+			productReference = 84C06E09EBC109D7DDA1F2E1 /* ScreenScribeTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		066A923EA2D15BDB23DDB27D /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					0E87ACA7F93DE3066270835D = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Manual;
+					};
+				};
+			};
+			buildConfigurationList = 8396B02614551ECF59A0083B /* Build configuration list for PBXProject "ScreenScribe" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 29F5940BEDEBDB3E92D1B057;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				8676783CA7068BBD520AD642 /* XCRemoteSwiftPackageReference "WhisperKit" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = D997E1B9091F8D0BD43CD2D1 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				0E87ACA7F93DE3066270835D /* ScreenScribe */,
+				320F05DBF4770EEAE21DA581 /* ScreenScribeTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		13F9F3CA07DD7698FB312F22 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CC2127D884A48CFDEFA74B64 /* AppModel.swift in Sources */,
+				BF3FB15C6268A40F049881D6 /* AppSessionState.swift in Sources */,
+				3FE599D694ADB329736BA936 /* AudioCaptureService.swift in Sources */,
+				D7D2A74F1CE7FDAAAF4ACFBF /* MainWindowView.swift in Sources */,
+				AE4A9B86A9E3FBDAFFD7ACD0 /* MenuBarContentView.swift in Sources */,
+				51B9AACA7D030CA278416FB3 /* ScreenScribeApp.swift in Sources */,
+				B0055521E04ED51947C3BDB5 /* SessionModels.swift in Sources */,
+				0E002BA70E16C6EF7D9D988E /* SessionStorageService.swift in Sources */,
+				77D2FFAEF5B49F482AE10F23 /* SettingsView.swift in Sources */,
+				574B369C08EF1EDECB84288E /* SourceSelection.swift in Sources */,
+				9187DEDF6D76AEC254A3F96D /* TranscriptExporter.swift in Sources */,
+				357E87FD903AF21AA2FA6C7B /* TranscriptModels.swift in Sources */,
+				FB7108BCB0E7B431216F5A43 /* TranscriptionService.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8F0C39AE16302F3F128822CB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				53656FE76E0D3E91955D3EC3 /* SessionStateMachineTests.swift in Sources */,
+				5EB4E847478FC238AE4D25EC /* TranscriptExporterTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		033791B50C2E3D43CC9BF8DD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0E87ACA7F93DE3066270835D /* ScreenScribe */;
+			targetProxy = BEDD8041CC3253B5BC03627B /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		2D7D6A6C7DA826189015861F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.ray.ScreenScribeTests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ScreenScribe.app/Contents/MacOS/ScreenScribe";
+			};
+			name = Debug;
+		};
+		3DD7B86ED8416347D91B7DF3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = ScreenScribe/ScreenScribe.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "幕语";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_NSScreenCaptureUsageDescription = "幕语需要读取所选屏幕、窗口或应用的系统音频以生成本地文稿，不会保存视频画面。";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.ray.ScreenScribe;
+				PRODUCT_NAME = "幕语";
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		42A00B5BAA8E027B3F1EDDB2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		65BA0A73CD1C4DE0F667D74B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = ScreenScribe/ScreenScribe.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "幕语";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_NSScreenCaptureUsageDescription = "幕语需要读取所选屏幕、窗口或应用的系统音频以生成本地文稿，不会保存视频画面。";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.ray.ScreenScribe;
+				PRODUCT_NAME = "幕语";
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		AEF0DD2A4D486EA21EB0E1E3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = arm64;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		BA693D19B4A1BC068CCC4E2F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.ray.ScreenScribeTests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ScreenScribe.app/Contents/MacOS/ScreenScribe";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		8396B02614551ECF59A0083B /* Build configuration list for PBXProject "ScreenScribe" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				42A00B5BAA8E027B3F1EDDB2 /* Debug */,
+				AEF0DD2A4D486EA21EB0E1E3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		BA09A2FC0C101DD5A5B03B27 /* Build configuration list for PBXNativeTarget "ScreenScribeTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2D7D6A6C7DA826189015861F /* Debug */,
+				BA693D19B4A1BC068CCC4E2F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		D5F0F16434B37145E8A44DF9 /* Build configuration list for PBXNativeTarget "ScreenScribe" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				65BA0A73CD1C4DE0F667D74B /* Debug */,
+				3DD7B86ED8416347D91B7DF3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		8676783CA7068BBD520AD642 /* XCRemoteSwiftPackageReference "WhisperKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/argmaxinc/WhisperKit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.13.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		0ED061080AB52AE3333695F8 /* WhisperKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8676783CA7068BBD520AD642 /* XCRemoteSwiftPackageReference "WhisperKit" */;
+			productName = WhisperKit;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 066A923EA2D15BDB23DDB27D /* Project object */;
+}

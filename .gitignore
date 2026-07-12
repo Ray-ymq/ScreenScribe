@@ -1,0 +1,14 @@
+.DS_Store
+.build/
+DerivedData/
+xcuserdata/
+*.xcuserstate
+ScreenScribe.xcodeproj/project.xcworkspace/xcuserdata/
+ScreenScribe.xcodeproj/xcuserdata/
+
+# Local runtime data and downloaded models
+Application Support/
+Models/
+Sessions/
+Exports/
+

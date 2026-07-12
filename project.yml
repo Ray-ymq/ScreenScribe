@@ -1,0 +1,47 @@
+name: ScreenScribe
+options:
+  bundleIdPrefix: com.ray
+  deploymentTarget:
+    macOS: "15.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MACOSX_DEPLOYMENT_TARGET: "15.0"
+    ARCHS: arm64
+targets:
+  ScreenScribe:
+    type: application
+    platform: macOS
+    sources:
+      - path: ScreenScribe
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.ray.ScreenScribe
+        PRODUCT_NAME: 幕语
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: 幕语
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.productivity
+        INFOPLIST_KEY_NSScreenCaptureUsageDescription: 幕语需要读取所选屏幕、窗口或应用的系统音频以生成本地文稿，不会保存视频画面。
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: "-"
+        DEVELOPMENT_TEAM: ""
+        ENABLE_HARDENED_RUNTIME: NO
+    entitlements:
+      path: ScreenScribe/ScreenScribe.entitlements
+      properties:
+        com.apple.security.app-sandbox: false
+    dependencies:
+      - package: WhisperKit
+  ScreenScribeTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: Tests/ScreenScribeCoreTests
+    dependencies:
+      - target: ScreenScribe
+packages:
+  WhisperKit:
+    url: https://github.com/argmaxinc/WhisperKit.git
+    from: 0.13.0
+
