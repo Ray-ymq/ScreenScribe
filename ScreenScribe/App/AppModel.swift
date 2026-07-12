@@ -17,12 +17,20 @@ final class AppModel {
     var defaultModel = ModelDescriptor.small
     var keepOriginalAudio = false
     var terminologyPrompt = ""
+    var installedModelIDs: Set<String> = []
+    var modelDownloadProgress: [String: Double] = [:]
 
     @ObservationIgnored private var audioCapture: ScreenCaptureAudioService?
     @ObservationIgnored private var levelTask: Task<Void, Never>?
     @ObservationIgnored private var pcmTask: Task<Void, Never>?
     @ObservationIgnored private let sessionStorage = try? FileSessionStorageService()
     @ObservationIgnored private var windowPlanner = AudioWindowPlanner()
+    @ObservationIgnored private let modelManager = try? WhisperKitModelManager()
+    @ObservationIgnored private var transcriptionService: WhisperKitTranscriptionService?
+
+    init() {
+        Task { await refreshInstalledModels() }
+    }
 
     var state: AppSessionState { stateMachine.state }
 
@@ -115,6 +123,7 @@ final class AppModel {
                 transition(to: .finalizing)
                 finalizationProgress = 0
                 await updatePersistedState()
+                await finalizeTranscription()
             } catch {
                 await fail(error)
             }
@@ -141,6 +150,7 @@ final class AppModel {
             try await persistCurrentSession()
 
             let service = ScreenCaptureAudioService(filter: filter)
+            transcriptionService = try WhisperKitTranscriptionService(model: defaultModel)
             audioCapture = service
             observe(service)
             try await service.start(outputURL: audioURL)
@@ -166,9 +176,111 @@ final class AppModel {
                 guard !Task.isCancelled else { break }
                 guard let self else { break }
                 let windows = windowPlanner.append(pcm)
-                // WhisperKit real-time inference is connected in the transcription phase.
-                _ = windows
+                for window in windows {
+                    await transcribeRealtime(window)
+                }
             }
+        }
+    }
+
+    func downloadModel(_ model: ModelDescriptor) {
+        guard modelDownloadProgress[model.id] == nil, let modelManager else { return }
+        modelDownloadProgress[model.id] = 0
+        Task {
+            do {
+                for try await progress in modelManager.download(model) {
+                    modelDownloadProgress[model.id] = progress
+                }
+                modelDownloadProgress[model.id] = nil
+                await refreshInstalledModels()
+            } catch {
+                modelDownloadProgress[model.id] = nil
+                errorMessage = error.localizedDescription
+            }
+        }
+    }
+
+    func deleteModel(_ model: ModelDescriptor) {
+        guard let modelManager else { return }
+        Task {
+            do {
+                try await modelManager.delete(model)
+                await refreshInstalledModels()
+                if defaultModel == model { defaultModel = .small }
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+        }
+    }
+
+    func refreshInstalledModels() async {
+        guard let modelManager else { return }
+        do {
+            installedModelIDs = Set(try await modelManager.installedModels().map(\.id))
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    private func transcribeRealtime(_ window: AudioWindow) async {
+        guard let transcriptionService else { return }
+        let startedAt = Date()
+        do {
+            let incoming = try await transcriptionService.transcribeWindow(
+                samples: window.samples,
+                sampleRate: 16_000,
+                offset: window.startTime
+            )
+            inferenceDelay = Date().timeIntervalSince(startedAt)
+            segments = RealtimeTranscriptMerger().merge(existing: segments, incoming: incoming)
+            if var session = currentSession {
+                session.segments = segments
+                session.updatedAt = Date()
+                currentSession = session
+                try? await persistCurrentSession()
+            }
+        } catch {
+            // Real-time inference may be disabled without interrupting complete audio capture.
+            inferenceDelay = Date().timeIntervalSince(startedAt)
+            errorMessage = "实时转写暂不可用，完整音频仍在保存：\(error.localizedDescription)"
+        }
+    }
+
+    private func finalizeTranscription() async {
+        guard
+            let transcriptionService,
+            let audioPath = currentSession?.temporaryAudioPath
+        else {
+            await fail(ScreenCaptureAudioError.notRunning)
+            return
+        }
+
+        do {
+            finalizationProgress = 0.1
+            for try await refined in transcriptionService.refine(audioURL: URL(filePath: audioPath)) {
+                let result = TranscriptReconciler().reconcile(existing: segments, refined: refined)
+                segments = result.segments
+                if var session = currentSession {
+                    session.segments = result.segments
+                    session.conflicts = result.conflicts
+                    currentSession = session
+                }
+                finalizationProgress = 0.9
+            }
+            transition(to: .completed)
+            finalizationProgress = 1
+            if var session = currentSession {
+                session.state = .completed
+                session.updatedAt = Date()
+                if !keepOriginalAudio {
+                    try? FileManager.default.removeItem(atPath: audioPath)
+                    session.temporaryAudioPath = nil
+                }
+                currentSession = session
+            }
+            try await persistCurrentSession()
+        } catch {
+            await fail(error)
         }
     }
 

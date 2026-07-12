@@ -42,6 +42,14 @@ public struct ModelDescriptor: Codable, Equatable, Hashable, Identifiable, Senda
         displayName: "多语言 Medium",
         approximateBytes: 1_530_000_000
     )
+
+    public var whisperKitVariant: String {
+        switch id {
+        case Self.small.id: "openai_whisper-small"
+        case Self.medium.id: "openai_whisper-medium"
+        default: id
+        }
+    }
 }
 
 public protocol ModelManager: Sendable {

@@ -106,6 +106,24 @@ func checkEditProtection() throws {
     try require(result.conflicts.count == 1, "用户编辑冲突未记录")
 }
 
+func checkRealtimeMerge() throws {
+    let old = TranscriptSegment(
+        startTime: 0,
+        endTime: 3,
+        text: "旧临时片段",
+        status: .provisional
+    )
+    let replacement = TranscriptSegment(
+        startTime: 2,
+        endTime: 4,
+        text: "重叠的新片段",
+        status: .provisional
+    )
+    let merged = RealtimeTranscriptMerger().merge(existing: [old], incoming: [replacement])
+    try require(!merged.contains(where: { $0.id == old.id }), "重叠的旧临时片段未去重")
+    try require(merged.contains(where: { $0.id == replacement.id }), "实时新片段未合并")
+}
+
 func checkRecoveryPolicy() throws {
     var session = RecordingSession(
         title: "中断会话",
@@ -124,6 +142,7 @@ do {
     try checkExports()
     try checkAudioProcessing()
     try checkEditProtection()
+    try checkRealtimeMerge()
     try checkRecoveryPolicy()
     print("ScreenScribeCoreChecks: 通过")
 } catch {

@@ -33,6 +33,7 @@ targets:
         com.apple.security.app-sandbox: false
     dependencies:
       - package: WhisperKit
+        product: WhisperKit
   ScreenScribeTests:
     type: bundle.unit-test
     platform: macOS
@@ -42,6 +43,5 @@ targets:
       - target: ScreenScribe
 packages:
   WhisperKit:
-    url: https://github.com/argmaxinc/WhisperKit.git
-    from: 0.13.0
-
+    url: https://github.com/argmaxinc/argmax-oss-swift.git
+    from: 1.0.0

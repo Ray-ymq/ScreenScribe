@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 
 struct SettingsView: View {
@@ -10,6 +11,11 @@ struct SettingsView: View {
             Picker("默认模型", selection: $model.defaultModel) {
                 Text("多语言 Small（约 486 MB）").tag(ModelDescriptor.small)
                 Text("多语言 Medium（约 1.53 GB）").tag(ModelDescriptor.medium)
+            }
+
+            Section("本地模型") {
+                modelRow(.small)
+                modelRow(.medium)
             }
 
             Toggle("保留原始音频", isOn: $model.keepOriginalAudio)
@@ -26,5 +32,26 @@ struct SettingsView: View {
         .formStyle(.grouped)
         .padding()
     }
-}
 
+    @ViewBuilder
+    private func modelRow(_ descriptor: ModelDescriptor) -> some View {
+        HStack {
+            VStack(alignment: .leading) {
+                Text(descriptor.displayName)
+                Text(ByteCountFormatter.string(fromByteCount: descriptor.approximateBytes, countStyle: .file))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+            if let progress = model.modelDownloadProgress[descriptor.id] {
+                ProgressView(value: progress)
+                    .frame(width: 110)
+            } else if model.installedModelIDs.contains(descriptor.id) {
+                Button("删除") { model.deleteModel(descriptor) }
+                    .disabled(model.defaultModel == descriptor)
+            } else {
+                Button("下载") { model.downloadModel(descriptor) }
+            }
+        }
+    }
+}
