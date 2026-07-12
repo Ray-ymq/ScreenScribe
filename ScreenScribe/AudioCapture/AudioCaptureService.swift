@@ -14,9 +14,9 @@ public struct AudioLevel: Equatable, Sendable {
 
 public protocol AudioCaptureService: Sendable {
     var levelUpdates: AsyncStream<AudioLevel> { get }
-    func start(source: CaptureSourceSelection, outputURL: URL) async throws
+    var pcmUpdates: AsyncStream<[Int16]> { get }
+    func start(outputURL: URL) async throws
     func pause() async throws
     func resume() async throws
     func stop() async throws
 }
-

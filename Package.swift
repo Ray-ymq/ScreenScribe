@@ -18,6 +18,7 @@ let package = Package(
                 "MenuBar",
                 "Views",
                 "Settings",
+                "SourcePicker",
                 "ScreenScribe.entitlements"
             ],
             sources: [
