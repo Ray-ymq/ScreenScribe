@@ -23,8 +23,11 @@ let package = Package(
             sources: [
                 "Core",
                 "AudioCapture",
+                "AudioProcessing",
                 "Transcription",
+                "TranscriptProcessing",
                 "SessionStorage",
+                "Recovery",
                 "Export"
             ]
         ),

@@ -18,9 +18,9 @@ struct MenuBarContentView: View {
             Divider()
 
             Menu("选择来源") {
-                Button("整屏") { model.choosePlaceholderSource(kind: .display) }
-                Button("单窗口") { model.choosePlaceholderSource(kind: .window) }
-                Button("单应用") { model.choosePlaceholderSource(kind: .application) }
+                Button("整屏") { model.chooseSource(kind: .display) }
+                Button("单窗口") { model.chooseSource(kind: .window) }
+                Button("单应用") { model.chooseSource(kind: .application) }
             }
             .disabled(model.state == .recording || model.state == .paused)
 
@@ -62,4 +62,3 @@ struct MenuBarContentView: View {
         return "\(source) · \(model.state.rawValue)"
     }
 }
-
