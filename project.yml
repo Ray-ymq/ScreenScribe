@@ -19,6 +19,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.ray.ScreenScribe
         PRODUCT_NAME: 幕语
+        PRODUCT_MODULE_NAME: ScreenScribe
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: 幕语
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.productivity
@@ -39,9 +40,23 @@ targets:
     platform: macOS
     sources:
       - path: Tests/ScreenScribeCoreTests
+    settings:
+      base:
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/幕语.app/Contents/MacOS/幕语"
+        BUNDLE_LOADER: "$(TEST_HOST)"
     dependencies:
       - target: ScreenScribe
 packages:
   WhisperKit:
     url: https://github.com/argmaxinc/argmax-oss-swift.git
     from: 1.0.0
+schemes:
+  ScreenScribe:
+    build:
+      targets:
+        ScreenScribe: all
+    test:
+      config: Debug
+      gatherCoverageData: false
+      targets:
+        - name: ScreenScribeTests

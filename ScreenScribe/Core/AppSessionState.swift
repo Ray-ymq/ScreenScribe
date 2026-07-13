@@ -12,6 +12,7 @@ public enum AppSessionState: String, Codable, CaseIterable, Sendable {
     public func allowsTransition(to next: AppSessionState) -> Bool {
         switch (self, next) {
         case (.idle, .preparing),
+             (.preparing, .idle),
              (.preparing, .recording),
              (.preparing, .failed),
              (.recording, .paused),
@@ -23,6 +24,7 @@ public enum AppSessionState: String, Codable, CaseIterable, Sendable {
              (.finalizing, .completed),
              (.finalizing, .failed),
              (.completed, .idle),
+             (.completed, .failed),
              (.failed, .idle),
              (.failed, .finalizing):
             return true
@@ -57,4 +59,3 @@ public struct SessionStateMachine: Sendable {
         state = next
     }
 }
-

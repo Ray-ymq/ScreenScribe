@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MainWindowView: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.openSettings) private var openSettings
 
     var body: some View {
         NavigationSplitView {
@@ -14,22 +15,53 @@ struct MainWindowView: View {
 
                 Section("状态") {
                     LabeledContent("音频", value: model.audioLevel.isSilent ? "静音" : "有声音")
-                    LabeledContent("推理延迟", value: String(format: "%.1f 秒", model.inferenceDelay))
+                    LabeledContent("实时状态", value: realtimeModeLabel)
+                    LabeledContent(
+                        "结果延迟",
+                        value: String(format: "%.1f 秒", model.realtimeMetrics.submissionToDisplayDuration)
+                    )
+                    LabeledContent(
+                        "排队耗时",
+                        value: String(format: "%.1f 秒", model.realtimeMetrics.queueDuration)
+                    )
+                    LabeledContent("跳过窗口", value: "\(model.realtimeMetrics.skippedWindowCount)")
                 }
             }
             .navigationSplitViewColumnWidth(min: 220, ideal: 250)
         } detail: {
             VStack(spacing: 0) {
                 header
+                if let realtimeNotice = model.realtimeNotice {
+                    realtimeBanner(realtimeNotice)
+                }
                 Divider()
                 transcript
             }
         }
         .alert("幕语", isPresented: errorPresented) {
-            Button("好") { model.errorMessage = nil }
+            if model.requiresModelDownload {
+                Button("打开设置") {
+                    model.errorMessage = nil
+                    openSettings()
+                }
+            }
+            Button("好", role: .cancel) { model.errorMessage = nil }
         } message: {
             Text(model.errorMessage ?? "未知错误")
         }
+    }
+
+    private func realtimeBanner(_ message: String) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: model.realtimeMode == .suspended ? "pause.circle" : "tortoise")
+            Text(message)
+                .font(.callout)
+            Spacer()
+        }
+        .foregroundStyle(.secondary)
+        .padding(.horizontal)
+        .padding(.vertical, 9)
+        .background(.quaternary.opacity(0.45))
     }
 
     private var header: some View {
@@ -95,5 +127,12 @@ struct MainWindowView: View {
         case .userEdited: "用户编辑"
         }
     }
-}
 
+    private var realtimeModeLabel: String {
+        switch model.realtimeMode {
+        case .live: "实时"
+        case .throttled: "降频"
+        case .suspended: "已暂停"
+        }
+    }
+}

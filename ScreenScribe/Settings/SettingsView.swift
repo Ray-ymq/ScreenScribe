@@ -14,6 +14,10 @@ struct SettingsView: View {
             }
 
             Section("本地模型") {
+                if model.requiresModelDownload {
+                    Label("默认模型未安装或无法加载，请下载或重新下载。", systemImage: "exclamationmark.triangle")
+                        .foregroundStyle(.orange)
+                }
                 modelRow(.small)
                 modelRow(.medium)
             }
@@ -48,7 +52,7 @@ struct SettingsView: View {
                     .frame(width: 110)
             } else if model.installedModelIDs.contains(descriptor.id) {
                 Button("删除") { model.deleteModel(descriptor) }
-                    .disabled(model.defaultModel == descriptor)
+                    .disabled(model.defaultModel == descriptor && !model.requiresModelDownload)
             } else {
                 Button("下载") { model.downloadModel(descriptor) }
             }

@@ -11,6 +11,48 @@ enum CheckFailure: Error, CustomStringConvertible {
     }
 }
 
+final class CheckClock: @unchecked Sendable {
+    private let lock = NSLock()
+    private var value: TimeInterval = 0
+
+    func now() -> TimeInterval { lock.withLock { value } }
+    func advance(_ duration: TimeInterval) { lock.withLock { value += duration } }
+}
+
+actor CheckTranscriptionService: TranscriptionService {
+    private let clock: CheckClock
+    private var delays: [TimeInterval]
+
+    init(clock: CheckClock, delays: [TimeInterval]) {
+        self.clock = clock
+        self.delays = delays
+    }
+
+    func prepare() async throws {}
+
+    func transcribeWindow(
+        samples: [Int16],
+        sampleRate: Int,
+        offset: TimeInterval
+    ) async throws -> [TranscriptSegment] {
+        clock.advance(delays.removeFirst())
+        return [
+            TranscriptSegment(
+                startTime: offset,
+                endTime: offset + 1,
+                text: "实时片段",
+                status: .provisional
+            )
+        ]
+    }
+
+    nonisolated func refine(
+        audioURL: URL
+    ) -> AsyncThrowingStream<[TranscriptSegment], Error> {
+        AsyncThrowingStream { $0.finish() }
+    }
+}
+
 func require(_ condition: @autoclosure () -> Bool, _ message: String) throws {
     guard condition() else { throw CheckFailure.failed(message) }
 }
@@ -76,6 +118,46 @@ func checkAudioProcessing() throws {
     try require(windows.count == 2, "10 秒窗口和 1.5 秒重叠切分错误")
     try require(windows[0].startTime == 0, "首个窗口时间错误")
     try require(windows[1].startTime == 8.5, "重叠窗口时间错误")
+
+    var beforeSilence = AudioWindowPlanner(
+        sampleRate: 100,
+        minimumWindowDuration: 8,
+        targetWindowDuration: 10,
+        maximumWindowDuration: 12,
+        overlapDuration: 1.5,
+        minimumSilenceDuration: 0.3,
+        analysisFrameDuration: 0.01
+    )
+    var beforeSamples = [Int16](repeating: 4_000, count: 1_000)
+    beforeSamples.replaceSubrange(920..<960, with: repeatElement(0, count: 40))
+    let beforeWindow = beforeSilence.append(beforeSamples)
+    try require(beforeWindow.first?.samples.count == 960, "目标前静音边界未被选择")
+
+    var afterSilence = AudioWindowPlanner(
+        sampleRate: 100,
+        minimumWindowDuration: 8,
+        targetWindowDuration: 10,
+        maximumWindowDuration: 12,
+        overlapDuration: 1.5,
+        minimumSilenceDuration: 0.3,
+        analysisFrameDuration: 0.01
+    )
+    try require(
+        afterSilence.append([Int16](repeating: 4_000, count: 1_000)).isEmpty,
+        "没有静音时不应在 10 秒立即硬切"
+    )
+    let afterWindow = afterSilence.append([Int16](repeating: 0, count: 30))
+    try require(afterWindow.first?.samples.count == 1_030, "目标后首个静音边界未被选择")
+
+    var hardCut = AudioWindowPlanner(
+        sampleRate: 100,
+        minimumWindowDuration: 8,
+        targetWindowDuration: 10,
+        maximumWindowDuration: 12,
+        overlapDuration: 1.5
+    )
+    let hardWindow = hardCut.append([Int16](repeating: 4_000, count: 1_200))
+    try require(hardWindow.first?.samples.count == 1_200, "12 秒硬切失败")
 }
 
 func checkEditProtection() throws {
@@ -122,6 +204,50 @@ func checkRealtimeMerge() throws {
     let merged = RealtimeTranscriptMerger().merge(existing: [old], incoming: [replacement])
     try require(!merged.contains(where: { $0.id == old.id }), "重叠的旧临时片段未去重")
     try require(merged.contains(where: { $0.id == replacement.id }), "实时新片段未合并")
+
+    let edited = TranscriptSegment(
+        startTime: 2,
+        endTime: 4,
+        text: "用户编辑",
+        status: .userEdited
+    )
+    let protected = RealtimeTranscriptMerger().merge(existing: [edited], incoming: [replacement])
+    try require(protected == [edited], "实时合并覆盖了用户编辑片段")
+}
+
+func checkRealtimePolicy() async throws {
+    let clock = CheckClock()
+    let service = CheckTranscriptionService(clock: clock, delays: [6, 16, 4, 4])
+    let coordinator = RealtimeTranscriptionCoordinator(service: service, now: clock.now)
+    await coordinator.setResultHandler { _ in }
+
+    func window(start: TimeInterval) -> AudioWindow {
+        AudioWindow(
+            samples: [Int16](repeating: 1, count: 160_000),
+            startTime: start,
+            isFinal: false
+        )
+    }
+
+    await coordinator.submit(window(start: 0))
+    await coordinator.waitUntilIdle()
+    var mode = await coordinator.currentMode()
+    try require(mode == .throttled, "实时延迟未触发降频")
+
+    await coordinator.submit(window(start: 20))
+    await coordinator.waitUntilIdle()
+    mode = await coordinator.currentMode()
+    try require(mode == .suspended, "超时未暂停实时转写")
+
+    await coordinator.submit(window(start: 50))
+    await coordinator.waitUntilIdle()
+    mode = await coordinator.currentMode()
+    try require(mode == .throttled, "探测成功未恢复降频")
+
+    await coordinator.submit(window(start: 67))
+    await coordinator.waitUntilIdle()
+    mode = await coordinator.currentMode()
+    try require(mode == .live, "连续低延迟未恢复实时模式")
 }
 
 func checkRecoveryPolicy() throws {
@@ -143,6 +269,7 @@ do {
     try checkAudioProcessing()
     try checkEditProtection()
     try checkRealtimeMerge()
+    try await checkRealtimePolicy()
     try checkRecoveryPolicy()
     print("ScreenScribeCoreChecks: 通过")
 } catch {

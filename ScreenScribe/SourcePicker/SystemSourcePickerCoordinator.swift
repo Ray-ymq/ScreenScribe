@@ -46,25 +46,34 @@ final class SystemSourcePickerCoordinator: NSObject, @preconcurrency SCContentSh
         picker.present()
     }
 
-    func contentSharingPicker(
+    nonisolated func contentSharingPicker(
         _ picker: SCContentSharingPicker,
         didUpdateWith filter: SCContentFilter,
         for stream: SCStream?
     ) {
-        completion?(.success(filter))
-        completion = nil
+        Task { @MainActor [weak self] in
+            self?.finish(with: .success(filter))
+        }
     }
 
-    func contentSharingPicker(
+    nonisolated func contentSharingPicker(
         _ picker: SCContentSharingPicker,
         didCancelFor stream: SCStream?
     ) {
-        completion?(.failure(SourcePickerError.cancelled))
-        completion = nil
+        Task { @MainActor [weak self] in
+            self?.finish(with: .failure(SourcePickerError.cancelled))
+        }
     }
 
-    func contentSharingPickerStartDidFailWithError(_ error: Error) {
-        completion?(.failure(SourcePickerError.failed(error.localizedDescription)))
+    nonisolated func contentSharingPickerStartDidFailWithError(_ error: Error) {
+        let message = error.localizedDescription
+        Task { @MainActor [weak self] in
+            self?.finish(with: .failure(SourcePickerError.failed(message)))
+        }
+    }
+
+    private func finish(with result: Result<SCContentFilter, Error>) {
+        completion?(result)
         completion = nil
     }
 

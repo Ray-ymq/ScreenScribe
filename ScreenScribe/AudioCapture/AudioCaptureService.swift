@@ -12,9 +12,20 @@ public struct AudioLevel: Equatable, Sendable {
     }
 }
 
+public struct AudioCaptureFailure: Error, LocalizedError, Equatable, Sendable {
+    public let message: String
+
+    public init(message: String) {
+        self.message = message
+    }
+
+    public var errorDescription: String? { message }
+}
+
 public protocol AudioCaptureService: Sendable {
     var levelUpdates: AsyncStream<AudioLevel> { get }
     var pcmUpdates: AsyncStream<[Int16]> { get }
+    var failureUpdates: AsyncStream<AudioCaptureFailure> { get }
     func start(outputURL: URL) async throws
     func pause() async throws
     func resume() async throws

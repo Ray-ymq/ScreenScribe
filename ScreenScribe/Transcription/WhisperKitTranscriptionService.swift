@@ -30,18 +30,29 @@ public actor WhisperKitTranscriptionService: TranscriptionService {
         guard whisperKit == nil else { return }
 
         let modelManager = try WhisperKitModelManager(modelsDirectory: modelsDirectory)
-        let localFolder = await modelManager.localModelFolder(for: model)
+        guard let localFolder = await modelManager.localModelFolder(for: model) else {
+            throw TranscriptionPreparationError.modelUnavailable(model)
+        }
         let configuration = WhisperKitConfig(
             model: model.whisperKitVariant,
             downloadBase: modelsDirectory,
-            modelFolder: localFolder?.path,
+            modelFolder: localFolder.path,
+            tokenizerFolder: localFolder,
             verbose: false,
             prewarm: true,
             load: true,
-            download: localFolder == nil,
-            useBackgroundDownloadSession: true
+            download: false,
+            useBackgroundDownloadSession: false
         )
-        whisperKit = try await WhisperKit(configuration)
+        do {
+            whisperKit = try await WhisperKit(configuration)
+        } catch {
+            whisperKit = nil
+            throw TranscriptionPreparationError.modelDamaged(
+                model,
+                message: error.localizedDescription
+            )
+        }
     }
 
     public func transcribeWindow(
@@ -116,4 +127,3 @@ public actor WhisperKitTranscriptionService: TranscriptionService {
         }
     }
 }
-

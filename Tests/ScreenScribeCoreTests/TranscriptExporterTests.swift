@@ -1,6 +1,10 @@
 import Foundation
 import XCTest
+#if canImport(ScreenScribeCore)
 @testable import ScreenScribeCore
+#elseif canImport(ScreenScribe)
+@testable import ScreenScribe
+#endif
 
 final class TranscriptExporterTests: XCTestCase {
     private let exporter = DefaultTranscriptExporter()

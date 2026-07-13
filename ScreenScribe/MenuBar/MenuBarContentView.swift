@@ -38,13 +38,20 @@ struct MenuBarContentView: View {
         }
         .padding(10)
         .frame(width: 240)
+        .onChange(of: model.requiresModelDownload) { _, required in
+            if required { openSettings() }
+        }
     }
 
     @ViewBuilder
     private var controls: some View {
         switch model.state {
         case .idle, .completed, .failed:
-            Button("开始") { model.start() }
+            if model.isDefaultModelInstalled {
+                Button("开始") { model.start() }
+            } else {
+                Button("下载默认模型…") { openSettings() }
+            }
         case .recording:
             Button("暂停") { model.pause() }
             Button("停止") { model.stop() }
@@ -59,6 +66,12 @@ struct MenuBarContentView: View {
 
     private var statusText: String {
         let source = model.selectedSource?.title ?? "未选择来源"
-        return "\(source) · \(model.state.rawValue)"
+        let realtime: String
+        switch model.realtimeMode {
+        case .live: realtime = "实时"
+        case .throttled: realtime = "降频"
+        case .suspended: realtime = "实时暂停"
+        }
+        return "\(source) · \(model.state.rawValue) · \(realtime)"
     }
 }

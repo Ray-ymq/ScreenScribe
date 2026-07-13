@@ -11,6 +11,9 @@ public struct TranscriptionProgress: Equatable, Sendable {
 }
 
 public protocol TranscriptionService: Sendable {
+    /// Loads and prewarms the selected model before audio capture begins.
+    func prepare() async throws
+
     func transcribeWindow(
         samples: [Int16],
         sampleRate: Int,
@@ -18,6 +21,20 @@ public protocol TranscriptionService: Sendable {
     ) async throws -> [TranscriptSegment]
 
     func refine(audioURL: URL) -> AsyncThrowingStream<[TranscriptSegment], Error>
+}
+
+public enum TranscriptionPreparationError: Error, LocalizedError, Sendable {
+    case modelUnavailable(ModelDescriptor)
+    case modelDamaged(ModelDescriptor, message: String)
+
+    public var errorDescription: String? {
+        switch self {
+        case let .modelUnavailable(model):
+            "尚未安装\(model.displayName)，请在设置中下载后再开始录制。"
+        case let .modelDamaged(model, message):
+            "\(model.displayName)无法加载，模型可能已损坏。请在设置中重新下载。\n\(message)"
+        }
+    }
 }
 
 public struct ModelDescriptor: Codable, Equatable, Hashable, Identifiable, Sendable {

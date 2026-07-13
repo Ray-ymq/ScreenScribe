@@ -22,12 +22,14 @@ public enum ScreenCaptureAudioError: Error, LocalizedError {
 public final class ScreenCaptureAudioService: NSObject, @unchecked Sendable, AudioCaptureService {
     public let levelUpdates: AsyncStream<AudioLevel>
     public let pcmUpdates: AsyncStream<[Int16]>
+    public let failureUpdates: AsyncStream<AudioCaptureFailure>
 
     private let filter: SCContentFilter
     private let sampleQueue = DispatchQueue(label: "com.ray.ScreenScribe.audio-samples", qos: .userInitiated)
     private let lock = NSLock()
     private let levelContinuation: AsyncStream<AudioLevel>.Continuation
     private let pcmContinuation: AsyncStream<[Int16]>.Continuation
+    private let failureContinuation: AsyncStream<AudioCaptureFailure>.Continuation
 
     private var stream: SCStream?
     private var audioFile: AVAudioFile?
@@ -37,12 +39,17 @@ public final class ScreenCaptureAudioService: NSObject, @unchecked Sendable, Aud
         self.filter = filter
         (levelUpdates, levelContinuation) = AsyncStream.makeStream(of: AudioLevel.self)
         (pcmUpdates, pcmContinuation) = AsyncStream.makeStream(of: [Int16].self)
+        (failureUpdates, failureContinuation) = AsyncStream.makeStream(
+            of: AudioCaptureFailure.self,
+            bufferingPolicy: .bufferingNewest(1)
+        )
         super.init()
     }
 
     deinit {
         levelContinuation.finish()
         pcmContinuation.finish()
+        failureContinuation.finish()
     }
 
     public func start(outputURL: URL) async throws {
@@ -184,8 +191,9 @@ public final class ScreenCaptureAudioService: NSObject, @unchecked Sendable, Aud
                 pcmContinuation.yield(pcm)
             }
         } catch {
-            // Stream interruption is reported by SCStreamDelegate. A malformed individual
-            // sample is dropped so the complete session can continue recording.
+            failureContinuation.yield(
+                AudioCaptureFailure(message: "系统音频写入失败：\(error.localizedDescription)")
+            )
         }
     }
 
@@ -228,5 +236,8 @@ extension ScreenCaptureAudioService: SCStreamDelegate {
             audioFile = nil
             isPaused = false
         }
+        failureContinuation.yield(
+            AudioCaptureFailure(message: "系统音频捕获已中断：\(error.localizedDescription)")
+        )
     }
 }

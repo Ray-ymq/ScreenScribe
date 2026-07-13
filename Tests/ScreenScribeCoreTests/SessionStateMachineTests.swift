@@ -1,5 +1,9 @@
 import XCTest
+#if canImport(ScreenScribeCore)
 @testable import ScreenScribeCore
+#elseif canImport(ScreenScribe)
+@testable import ScreenScribe
+#endif
 
 final class SessionStateMachineTests: XCTestCase {
     func testCompleteRecordingFlow() throws {

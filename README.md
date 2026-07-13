@@ -14,7 +14,18 @@
 
 - macOS 15+
 - Apple Silicon
-- Xcode（完整安装）
+- Xcode 26.6+
+- XcodeGen
 
-当前机器尚未安装完整 Xcode。核心逻辑可以使用 `swift test` 验证；App 构建需要 Xcode。
+## 本地验证
 
+```bash
+swift run ScreenScribeCoreChecks
+xcodebuild -project ScreenScribe.xcodeproj -scheme ScreenScribe \
+  CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO build
+xcodebuild -project ScreenScribe.xcodeproj -scheme ScreenScribe \
+  CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO test
+```
+
+测试源码会按环境条件导入 SwiftPM 的 `ScreenScribeCore` 或 Xcode App 的
+`ScreenScribe` 模块。未安装本地 small 模型时，模型加载集成测试会自动跳过。
