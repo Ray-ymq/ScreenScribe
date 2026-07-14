@@ -215,6 +215,34 @@ func checkRealtimeMerge() throws {
     try require(protected == [edited], "实时合并覆盖了用户编辑片段")
 }
 
+func checkTranscriptionLanguage() throws {
+    var automatic = TranscriptionLanguageResolver(selection: .automatic)
+    try require(automatic.decodingPlan.shouldDetectLanguage, "自动模式未启用语言检测")
+    try require(
+        automatic.lockDetectedLanguage("zh", hasUsableTranscription: true),
+        "自动模式未锁定首次有效语言"
+    )
+    try require(automatic.decodingPlan.languageCode == "zh", "自动模式未复用锁定语言")
+    try require(!automatic.decodingPlan.shouldDetectLanguage, "锁定语言后仍重复检测")
+
+    let chinese = TranscriptionLanguageResolver(selection: .chinese)
+    try require(chinese.decodingPlan.languageCode == "zh", "中文模式未映射到 zh")
+    try require(!chinese.decodingPlan.shouldDetectLanguage, "中文模式错误启用自动检测")
+
+    let english = TranscriptionLanguageResolver(selection: .english)
+    try require(english.decodingPlan.languageCode == "en", "英文模式未映射到 en")
+    try require(!english.decodingPlan.shouldDetectLanguage, "英文模式错误启用自动检测")
+
+    try require(
+        TranscriptTextSanitizer.sanitized("<|en|>Hello<|0.84|>") == "Hello",
+        "Whisper 控制标记未被清理"
+    )
+    try require(
+        TranscriptTextSanitizer.sanitized("<|zh|><|0.00|>") == nil,
+        "清理后为空的片段未被丢弃"
+    )
+}
+
 func checkRealtimePolicy() async throws {
     let clock = CheckClock()
     let service = CheckTranscriptionService(clock: clock, delays: [6, 16, 4, 4])
@@ -269,6 +297,7 @@ do {
     try checkAudioProcessing()
     try checkEditProtection()
     try checkRealtimeMerge()
+    try checkTranscriptionLanguage()
     try await checkRealtimePolicy()
     try checkRecoveryPolicy()
     print("ScreenScribeCoreChecks: 通过")

@@ -5,9 +5,15 @@ public actor WhisperKitTranscriptionService: TranscriptionService {
     private let model: ModelDescriptor
     private let modelsDirectory: URL
     private var whisperKit: WhisperKit?
+    private var languageResolver: TranscriptionLanguageResolver
 
-    public init(model: ModelDescriptor, modelsDirectory: URL? = nil) throws {
+    public init(
+        model: ModelDescriptor,
+        modelsDirectory: URL? = nil,
+        transcriptionLanguage: TranscriptionLanguage = .automatic
+    ) throws {
         self.model = model
+        languageResolver = TranscriptionLanguageResolver(selection: transcriptionLanguage)
         if let modelsDirectory {
             self.modelsDirectory = modelsDirectory
         } else {
@@ -67,7 +73,11 @@ public actor WhisperKitTranscriptionService: TranscriptionService {
         guard let whisperKit else { return [] }
 
         let floatSamples = samples.map { Float($0) / Float(Int16.max) }
+        let decodingPlan = languageResolver.decodingPlan
         let options = DecodingOptions(
+            language: decodingPlan.languageCode,
+            detectLanguage: decodingPlan.shouldDetectLanguage,
+            skipSpecialTokens: true,
             wordTimestamps: true,
             concurrentWorkerCount: 1
         )
@@ -75,7 +85,20 @@ public actor WhisperKitTranscriptionService: TranscriptionService {
             audioArray: floatSamples,
             decodeOptions: options
         )
-        return Self.map(results: results, offset: offset, status: .provisional)
+        let mapped = Self.map(results: results, offset: offset, status: .provisional)
+        if decodingPlan.shouldDetectLanguage,
+           let resultWithUsableText = results.first(where: Self.hasUsableTranscript)
+        {
+            languageResolver.lockDetectedLanguage(
+                resultWithUsableText.language,
+                hasUsableTranscription: true
+            )
+        }
+        return mapped
+    }
+
+    public func resolvedLanguageCode() async -> String? {
+        languageResolver.resolvedLanguageCode
     }
 
     public nonisolated func refine(
@@ -98,7 +121,24 @@ public actor WhisperKitTranscriptionService: TranscriptionService {
     private func refineCompleteAudio(at audioURL: URL) async throws -> [TranscriptSegment] {
         try await prepare()
         guard let whisperKit else { return [] }
+
+        if languageResolver.requiresDetectionBeforeFinalization {
+            let detection = try await whisperKit.detectLanguage(audioPath: audioURL.path)
+            guard languageResolver.lockDetectedLanguage(
+                detection.language,
+                hasUsableTranscription: true
+            ) else {
+                throw TranscriptionLanguageResolutionError.invalidDetectedLanguage
+            }
+        }
+
+        guard let languageCode = languageResolver.decodingPlan.languageCode else {
+            throw TranscriptionLanguageResolutionError.invalidDetectedLanguage
+        }
         let options = DecodingOptions(
+            language: languageCode,
+            detectLanguage: false,
+            skipSpecialTokens: true,
             wordTimestamps: true,
             concurrentWorkerCount: 4,
             chunkingStrategy: .vad
@@ -116,8 +156,7 @@ public actor WhisperKitTranscriptionService: TranscriptionService {
         status: TranscriptSegmentStatus
     ) -> [TranscriptSegment] {
         results.flatMap(\.segments).compactMap { segment in
-            let text = segment.text.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !text.isEmpty else { return nil }
+            guard let text = TranscriptTextSanitizer.sanitized(segment.text) else { return nil }
             return TranscriptSegment(
                 startTime: offset + TimeInterval(segment.start),
                 endTime: offset + TimeInterval(segment.end),
@@ -125,5 +164,17 @@ public actor WhisperKitTranscriptionService: TranscriptionService {
                 status: status
             )
         }
+    }
+
+    private static func hasUsableTranscript(_ result: TranscriptionResult) -> Bool {
+        result.segments.contains { TranscriptTextSanitizer.sanitized($0.text) != nil }
+    }
+}
+
+private enum TranscriptionLanguageResolutionError: Error, LocalizedError {
+    case invalidDetectedLanguage
+
+    var errorDescription: String? {
+        "无法检测转写语言，请重试或在设置中固定选择中文或英文。"
     }
 }

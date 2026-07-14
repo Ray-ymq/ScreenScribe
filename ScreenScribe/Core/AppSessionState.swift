@@ -9,6 +9,15 @@ public enum AppSessionState: String, Codable, CaseIterable, Sendable {
     case completed
     case failed
 
+    public var locksTranscriptionLanguageSelection: Bool {
+        switch self {
+        case .preparing, .recording, .paused, .finalizing:
+            true
+        case .idle, .completed, .failed:
+            false
+        }
+    }
+
     public func allowsTransition(to next: AppSessionState) -> Bool {
         switch (self, next) {
         case (.idle, .preparing),

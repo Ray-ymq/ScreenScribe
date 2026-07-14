@@ -29,6 +29,12 @@ final class AppModel {
     var finalizationProgress: Double = 0
     var errorMessage: String?
     var defaultModel = ModelDescriptor.small
+    var transcriptionLanguage: TranscriptionLanguage {
+        didSet {
+            guard transcriptionLanguage != oldValue else { return }
+            transcriptionLanguage.persist(in: userDefaults)
+        }
+    }
     var keepOriginalAudio = false
     var terminologyPrompt = ""
     var installedModelIDs: Set<String> = []
@@ -40,16 +46,31 @@ final class AppModel {
     @ObservationIgnored private var captureFailureTask: Task<Void, Never>?
     @ObservationIgnored private var realtimeEventTask: Task<Void, Never>?
     @ObservationIgnored private var realtimePersistenceTask: Task<Void, Never>?
+    @ObservationIgnored private let userDefaults: UserDefaults
     @ObservationIgnored private let sessionStorage = try? FileSessionStorageService()
     @ObservationIgnored private let modelManager = try? WhisperKitModelManager()
     @ObservationIgnored private var realtimeCoordinator: RealtimeTranscriptionCoordinator?
+    private var activeTranscriptionLanguage: TranscriptionLanguage?
 
-    init() {
+    init(userDefaults: UserDefaults = .standard) {
+        self.userDefaults = userDefaults
+        transcriptionLanguage = TranscriptionLanguage.load(from: userDefaults)
         Task { await refreshInstalledModels() }
     }
 
     var state: AppSessionState { stateMachine.state }
     var isDefaultModelInstalled: Bool { installedModelIDs.contains(defaultModel.id) }
+    var isTranscriptionLanguageSelectionDisabled: Bool {
+        state.locksTranscriptionLanguageSelection
+    }
+    var displayedTranscriptionLanguage: String {
+        let selection = currentSession?.transcriptionLanguage
+            ?? activeTranscriptionLanguage
+            ?? transcriptionLanguage
+        return selection.sessionDisplayName(
+            detectedLanguageCode: currentSession?.detectedLanguageCode
+        )
+    }
 
     func transition(to next: AppSessionState) {
         do {
@@ -110,8 +131,10 @@ final class AppModel {
         realtimeMode = .live
         realtimeMetrics = RealtimeTranscriptionMetrics()
         requiresModelDownload = false
+        let languageForSession = transcriptionLanguage
+        activeTranscriptionLanguage = languageForSession
         transition(to: .preparing)
-        Task { await startCapture() }
+        Task { await startCapture(transcriptionLanguage: languageForSession) }
     }
 
     func pause() {
@@ -154,6 +177,7 @@ final class AppModel {
                 pcmTask?.cancel()
                 captureFailureTask?.cancel()
                 await realtimeCoordinator?.stop()
+                await realtimeEventTask?.value
                 await realtimePersistenceTask?.value
                 transition(to: .finalizing)
                 finalizationProgress = 0
@@ -166,7 +190,7 @@ final class AppModel {
         }
     }
 
-    private func startCapture() async {
+    private func startCapture(transcriptionLanguage: TranscriptionLanguage) async {
         guard let filter = selectedContentFilter, let source = selectedSource else {
             await fail(SourcePickerError.failed("捕获来源已失效"))
             return
@@ -174,7 +198,10 @@ final class AppModel {
 
         let transcription: WhisperKitTranscriptionService
         do {
-            transcription = try WhisperKitTranscriptionService(model: defaultModel)
+            transcription = try WhisperKitTranscriptionService(
+                model: defaultModel,
+                transcriptionLanguage: transcriptionLanguage
+            )
             try await transcription.prepare()
         } catch {
             await handleModelPreparationFailure(error)
@@ -197,6 +224,7 @@ final class AppModel {
                 source: source,
                 state: .preparing,
                 modelID: defaultModel.id,
+                transcriptionLanguage: transcriptionLanguage,
                 temporaryAudioPath: audioURL.path
             )
             try await persistCurrentSession()
@@ -343,6 +371,8 @@ final class AppModel {
             realtimeMetrics = metrics
         case let .nonfatalFailure(message):
             realtimeNotice = "实时转写暂不可用：\(message)。完整音频仍在保存。"
+        case let .languageResolved(languageCode):
+            applyResolvedLanguage(languageCode, persistImmediately: true)
         }
     }
 
@@ -370,6 +400,7 @@ final class AppModel {
                 }
                 finalizationProgress = 0.9
             }
+            await updateResolvedLanguageFromCoordinator()
             if var session = currentSession {
                 session.state = .completed
                 session.updatedAt = Date()
@@ -395,6 +426,7 @@ final class AppModel {
         if state == .preparing {
             transition(to: .idle)
         }
+        activeTranscriptionLanguage = nil
         requiresModelDownload = true
         errorMessage = error.localizedDescription
         await refreshInstalledModels()
@@ -428,6 +460,31 @@ final class AppModel {
         realtimePersistenceTask = nil
         audioCapture = nil
         realtimeCoordinator = nil
+    }
+
+    private func updateResolvedLanguageFromCoordinator() async {
+        guard let languageCode = await realtimeCoordinator?.resolvedLanguageCode() else { return }
+        applyResolvedLanguage(languageCode, persistImmediately: false)
+    }
+
+    private func applyResolvedLanguage(
+        _ languageCode: String,
+        persistImmediately: Bool
+    ) {
+        guard
+            var session = currentSession,
+            session.transcriptionLanguage == .automatic,
+            let normalizedCode = TranscriptionLanguage.normalizedLanguageCode(languageCode),
+            session.detectedLanguageCode != normalizedCode
+        else {
+            return
+        }
+        session.detectedLanguageCode = normalizedCode
+        session.updatedAt = Date()
+        currentSession = session
+        if persistImmediately {
+            enqueueRealtimePersistence(session)
+        }
     }
 
     private func makeTemporaryAudioURL(sessionID: UUID) throws -> URL {

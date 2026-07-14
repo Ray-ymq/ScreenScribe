@@ -10,6 +10,7 @@ struct MainWindowView: View {
                 Section("当前会话") {
                     Label(model.selectedSource?.title ?? "未选择来源", systemImage: "rectangle.on.rectangle")
                     Label(model.defaultModel.displayName, systemImage: "cpu")
+                    Label(model.displayedTranscriptionLanguage, systemImage: "character.bubble")
                     Label(model.state.rawValue, systemImage: "circle.fill")
                 }
 
