@@ -42,6 +42,7 @@ targets:
       - path: Tests/ScreenScribeCoreTests
     settings:
       base:
+        GENERATE_INFOPLIST_FILE: YES
         TEST_HOST: "$(BUILT_PRODUCTS_DIR)/幕语.app/Contents/MacOS/幕语"
         BUNDLE_LOADER: "$(TEST_HOST)"
     dependencies:
