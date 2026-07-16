@@ -99,7 +99,52 @@ func checkExports() throws {
     try require(srt.contains("00:00:01,235 --> 00:00:04,500"), "SRT 毫秒格式错误")
     try require(text == "测试中文文稿\n", "TXT 内容错误")
     try require(markdown.contains("来源：示例窗口"), "Markdown 缺少来源")
-    try require(markdown.contains("[00:00:01]"), "Markdown 缺少时间戳")
+    try require(markdown.contains("## 文稿\n\n测试中文文稿"), "Markdown 文稿正文错误")
+    try require(!markdown.contains("[00:00:01]"), "Markdown 不应保留片段时间戳")
+}
+
+func checkParagraphComposition() throws {
+    let first = TranscriptSegment(
+        startTime: 0,
+        endTime: 1,
+        text: "这是第一句",
+        status: .confirmed
+    )
+    let second = TranscriptSegment(
+        startTime: 1.2,
+        endTime: 2,
+        text: "继续当前段落",
+        status: .provisional
+    )
+    let edited = TranscriptSegment(
+        startTime: 2.1,
+        endTime: 3,
+        text: "用户修改",
+        status: .userEdited
+    )
+    let afterGap = TranscriptSegment(
+        startTime: 5,
+        endTime: 6,
+        text: "停顿后的段落",
+        status: .confirmed
+    )
+
+    let paragraphs = TranscriptParagraphComposer().compose(
+        segments: [afterGap, edited, second, first]
+    )
+
+    try require(paragraphs.count == 3, "自然段数量错误")
+    try require(paragraphs[0].text == "这是第一句继续当前段落", "中文片段未正确合并")
+    try require(paragraphs[0].sourceSegmentIDs == [first.id, second.id], "自然段未保留源片段")
+    try require(paragraphs[0].status == .provisional, "自然段状态优先级错误")
+    try require(paragraphs[1].id == edited.id, "用户编辑片段未保持独立")
+    try require(paragraphs[2].text == "停顿后的段落", "长停顿未正确分段")
+
+    let english = TranscriptParagraphComposer().compose(segments: [
+        TranscriptSegment(startTime: 0, endTime: 1, text: "Hello", status: .confirmed),
+        TranscriptSegment(startTime: 1.1, endTime: 2, text: "world.", status: .confirmed)
+    ])
+    try require(english.first?.text == "Hello world.", "英文片段空格错误")
 }
 
 func checkAudioProcessing() throws {
@@ -294,6 +339,7 @@ func checkRecoveryPolicy() throws {
 do {
     try checkStateMachine()
     try checkExports()
+    try checkParagraphComposition()
     try checkAudioProcessing()
     try checkEditProtection()
     try checkRealtimeMerge()

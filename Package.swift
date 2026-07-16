@@ -23,6 +23,7 @@ let package = Package(
             ],
             path: "ScreenScribe",
             exclude: [
+                "Assets.xcassets",
                 "App",
                 "MenuBar",
                 "Views",

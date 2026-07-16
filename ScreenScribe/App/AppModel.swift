@@ -59,6 +59,9 @@ final class AppModel {
     }
 
     var state: AppSessionState { stateMachine.state }
+    var paragraphs: [TranscriptParagraph] {
+        TranscriptParagraphComposer().compose(segments: segments)
+    }
     var isDefaultModelInstalled: Bool { installedModelIDs.contains(defaultModel.id) }
     var isTranscriptionLanguageSelectionDisabled: Bool {
         state.locksTranscriptionLanguageSelection
