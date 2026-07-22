@@ -1,19 +1,57 @@
-name: Build ScreenScribe
+name: ScreenScribe CI
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - "develop/**"
   pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
+concurrency:
+  group: screenscribe-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
-  build:
-    runs-on: macos-15
+  validate:
+    name: Build and test
+    runs-on: macos-26
     timeout-minutes: 60
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Select Xcode 26.6 or newer
+        shell: bash
+        run: |
+          selected_xcode=""
+
+          for candidate in /Applications/Xcode*.app; do
+            [[ "$candidate" == *beta* ]] && continue
+
+            version="$("$candidate/Contents/Developer/usr/bin/xcodebuild" -version | awk 'NR == 1 { print $2 }')"
+            major="${version%%.*}"
+            remainder="${version#*.}"
+            minor="${remainder%%.*}"
+
+            if (( major > 26 || (major == 26 && minor >= 6) )); then
+              selected_xcode="$candidate"
+              break
+            fi
+          done
+
+          if [[ -z "$selected_xcode" ]]; then
+            echo "Xcode 26.6 or newer is required but is not installed on this runner."
+            exit 1
+          fi
+
+          sudo xcode-select --switch "$selected_xcode/Contents/Developer"
 
       - name: Show toolchain
         run: |
@@ -29,7 +67,17 @@ jobs:
       - name: Run core checks
         run: swift run ScreenScribeCoreChecks
 
-      - name: Build arm64 app without Developer ID
+      - name: Run tests
+        run: |
+          xcodebuild \
+            -project ScreenScribe.xcodeproj \
+            -scheme ScreenScribe \
+            -destination 'platform=macOS,arch=arm64' \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            test
+
+      - name: Build Release app
         run: |
           xcodebuild \
             -project ScreenScribe.xcodeproj \
@@ -40,9 +88,11 @@ jobs:
             ARCHS=arm64 \
             ONLY_ACTIVE_ARCH=NO \
             CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
             build
 
-      - name: Ad-hoc sign and package
+      - name: Package app
+        if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
         run: |
           codesign --force --deep --sign - 'DerivedData/Build/Products/Release/幕语.app'
           ditto -c -k --sequesterRsrc --keepParent \
@@ -50,9 +100,61 @@ jobs:
             ScreenScribe.app.zip
 
       - name: Upload app artifact
-        uses: actions/upload-artifact@v4
+        if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v7
         with:
-          name: ScreenScribe-arm64
+          name: ScreenScribe-arm64-${{ github.sha }}
           path: ScreenScribe.app.zip
           if-no-files-found: error
+          retention-days: 14
 
+  create-pull-request:
+    name: Create pull request
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/develop/')
+    needs: validate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Create or reuse pull request to main
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_BRANCH: ${{ github.ref_name }}
+        run: |
+          existing_url="$(
+            gh pr list \
+              --repo "$GITHUB_REPOSITORY" \
+              --base main \
+              --head "$HEAD_BRANCH" \
+              --state open \
+              --json url \
+              --jq '.[0].url // empty'
+          )"
+
+          if [[ -n "$existing_url" ]]; then
+            echo "Pull request already exists: $existing_url"
+            exit 0
+          fi
+
+          gh pr create \
+            --repo "$GITHUB_REPOSITORY" \
+            --base main \
+            --head "$HEAD_BRANCH" \
+            --title "release: merge $HEAD_BRANCH into main" \
+            --body "$(cat <<EOF
+          ## Summary
+
+          Automated pull request for \`$HEAD_BRANCH\` after the branch passed ScreenScribe CI.
+
+          ## Verification
+
+          - Core checks
+          - Xcode unit tests
+          - Release build
+
+          This pull request was created by GitHub Actions and is not merged automatically.
+          EOF
+          )"
