@@ -42,19 +42,27 @@ MVP 范围冻结，后续不自行增加功能。
 ## 模块
 
 ```text
-ScreenScribe
+ScreenScribe/
 ├── App
-├── MenuBar
-├── SourcePicker
-├── AudioCapture
-├── AudioProcessing
-├── Transcription
-├── TranscriptProcessing
-├── SessionStorage
-├── Recovery
+├── Assets.xcassets
+├── Domain
+├── Features
+│   ├── Capture
+│   ├── Export
+│   ├── RecordingSessions
+│   └── Transcription
+├── Presentation
+│   ├── MainWindow
+│   ├── MenuBar
+│   └── Settings
+└── ScreenScribe.entitlements
+
+Tests/ScreenScribeCoreTests/
+├── Capture
 ├── Export
-├── Settings
-└── Tests
+├── Integration
+├── RecordingSessions
+└── Transcription
 ```
 
 统一状态：`idle → preparing → recording ⇄ paused → finalizing → completed`，任一运行阶段可进入 `failed`，失败会话可恢复精转。
