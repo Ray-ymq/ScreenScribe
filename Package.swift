@@ -23,22 +23,14 @@ let package = Package(
             ],
             path: "ScreenScribe",
             exclude: [
+                "Assets.xcassets",
                 "App",
-                "MenuBar",
-                "Views",
-                "Settings",
-                "SourcePicker",
+                "Presentation",
                 "ScreenScribe.entitlements"
             ],
             sources: [
-                "Core",
-                "AudioCapture",
-                "AudioProcessing",
-                "Transcription",
-                "TranscriptProcessing",
-                "SessionStorage",
-                "Recovery",
-                "Export"
+                "Domain",
+                "Features"
             ]
         ),
         .testTarget(

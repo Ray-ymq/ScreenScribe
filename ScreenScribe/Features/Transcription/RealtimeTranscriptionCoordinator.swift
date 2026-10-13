@@ -73,6 +73,7 @@ public enum RealtimeTranscriptionEvent: Equatable, Sendable {
     case modeChanged(RealtimeTranscriptionMode)
     case metricsUpdated(RealtimeTranscriptionMetrics)
     case nonfatalFailure(String)
+    case languageResolved(String)
 }
 
 public actor RealtimeTranscriptionCoordinator {
@@ -108,6 +109,7 @@ public actor RealtimeTranscriptionCoordinator {
     private var lastObservedAudioEnd: TimeInterval = 0
     private var lastStartedAudioEnd: TimeInterval?
     private var nextProbeAudioEnd: TimeInterval?
+    private var lastPublishedLanguageCode: String?
 
     public init(
         service: any TranscriptionService,
@@ -180,6 +182,10 @@ public actor RealtimeTranscriptionCoordinator {
         audioURL: URL
     ) -> AsyncThrowingStream<[TranscriptSegment], Error> {
         service.refine(audioURL: audioURL)
+    }
+
+    public func resolvedLanguageCode() async -> String? {
+        await service.resolvedLanguageCode()
     }
 
     public func waitUntilIdle() async {
@@ -280,6 +286,7 @@ public actor RealtimeTranscriptionCoordinator {
                 let inferenceFinishedAt = now()
                 let inferenceDuration = max(0, inferenceFinishedAt - inferenceStartedAt)
                 await resultHandler(incoming)
+                await publishResolvedLanguageIfNeeded()
                 let displayedAt = now()
                 handleSuccess(
                     work,
@@ -307,6 +314,17 @@ public actor RealtimeTranscriptionCoordinator {
 
         currentWork = nil
         processingTask = nil
+    }
+
+    private func publishResolvedLanguageIfNeeded() async {
+        guard
+            let languageCode = await service.resolvedLanguageCode(),
+            languageCode != lastPublishedLanguageCode
+        else {
+            return
+        }
+        lastPublishedLanguageCode = languageCode
+        eventContinuation.yield(.languageResolved(languageCode))
     }
 
     private func takePendingWork() -> WorkItem? {

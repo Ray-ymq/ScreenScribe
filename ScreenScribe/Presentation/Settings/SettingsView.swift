@@ -13,6 +13,18 @@ struct SettingsView: View {
                 Text("多语言 Medium（约 1.53 GB）").tag(ModelDescriptor.medium)
             }
 
+            Picker("转写语言", selection: $model.transcriptionLanguage) {
+                ForEach(TranscriptionLanguage.allCases) { language in
+                    Text(language.displayName).tag(language)
+                }
+            }
+            .pickerStyle(.segmented)
+            .disabled(model.isTranscriptionLanguageSelectionDisabled)
+
+            Text("自动模式会在本次录制首次识别到有效文稿时锁定语言；修改只影响下一次录制。")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
             Section("本地模型") {
                 if model.requiresModelDownload {
                     Label("默认模型未安装或无法加载，请下载或重新下载。", systemImage: "exclamationmark.triangle")

@@ -21,6 +21,13 @@ public protocol TranscriptionService: Sendable {
     ) async throws -> [TranscriptSegment]
 
     func refine(audioURL: URL) -> AsyncThrowingStream<[TranscriptSegment], Error>
+
+    /// Returns the fixed or automatically locked language for this recording.
+    func resolvedLanguageCode() async -> String?
+}
+
+public extension TranscriptionService {
+    func resolvedLanguageCode() async -> String? { nil }
 }
 
 public enum TranscriptionPreparationError: Error, LocalizedError, Sendable {

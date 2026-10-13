@@ -18,9 +18,11 @@ public struct DefaultTranscriptExporter: TranscriptExporter {
         let segments = session.segments.sorted { $0.startTime < $1.startTime }
         switch format {
         case .markdown:
-            return renderMarkdown(session: session, segments: segments)
+            let paragraphs = TranscriptParagraphComposer().compose(segments: segments)
+            return renderMarkdown(session: session, paragraphs: paragraphs)
         case .text:
-            return segments.map(\.text).joined(separator: "\n") + "\n"
+            let paragraphs = TranscriptParagraphComposer().compose(segments: segments)
+            return renderText(paragraphs: paragraphs)
         case .srt:
             return renderSRT(segments: segments)
         }
@@ -31,13 +33,17 @@ public struct DefaultTranscriptExporter: TranscriptExporter {
         try content.write(to: url, atomically: true, encoding: .utf8)
     }
 
-    private func renderMarkdown(session: RecordingSession, segments: [TranscriptSegment]) -> String {
-        let date = ISO8601DateFormatter().string(from: session.createdAt)
-        let lines = segments.map { segment in
-            "- [\(shortTimestamp(segment.startTime))] \(segment.text)"
-        }.joined(separator: "\n")
+    private func renderText(paragraphs: [TranscriptParagraph]) -> String {
+        let body = paragraphs.map(\.text).joined(separator: "\n\n")
+        return body.isEmpty ? "" : body + "\n"
+    }
 
-        return """
+    private func renderMarkdown(
+        session: RecordingSession,
+        paragraphs: [TranscriptParagraph]
+    ) -> String {
+        let date = ISO8601DateFormatter().string(from: session.createdAt)
+        let header = """
         # \(session.title)
 
         - 日期：\(date)
@@ -45,24 +51,20 @@ public struct DefaultTranscriptExporter: TranscriptExporter {
         - 模型：\(session.modelID)
 
         ## 文稿
-
-        \(lines)
-        """ + "\n"
+        """
+        let body = paragraphs.map(\.text).joined(separator: "\n\n")
+        return body.isEmpty ? header + "\n" : header + "\n\n" + body + "\n"
     }
 
     private func renderSRT(segments: [TranscriptSegment]) -> String {
-        segments.enumerated().map { index, segment in
+        guard !segments.isEmpty else { return "" }
+        return segments.enumerated().map { index, segment in
             """
             \(index + 1)
             \(srtTimestamp(segment.startTime)) --> \(srtTimestamp(segment.endTime))
             \(segment.text)
             """
         }.joined(separator: "\n\n") + "\n"
-    }
-
-    private func shortTimestamp(_ interval: TimeInterval) -> String {
-        let totalSeconds = max(0, Int(interval))
-        return String(format: "%02d:%02d:%02d", totalSeconds / 3600, (totalSeconds / 60) % 60, totalSeconds % 60)
     }
 
     private func srtTimestamp(_ interval: TimeInterval) -> String {
@@ -74,4 +76,3 @@ public struct DefaultTranscriptExporter: TranscriptExporter {
         return String(format: "%02d:%02d:%02d,%03d", hours, minutes, seconds, milliseconds)
     }
 }
-
